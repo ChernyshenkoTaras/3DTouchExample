@@ -1,0 +1,1 @@
+Example project for https://stackoverflow.com/questions/44666454/detecting-uitouches-while-uiviewcontroller-is-being-shown-as-3dtouch-preview question. For demonstrate how to implement 3D Touch in same way as Facebook does.
