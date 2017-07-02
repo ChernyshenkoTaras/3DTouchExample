@@ -9,7 +9,7 @@
 import UIKit
 
 class ViewController: UIViewController, UICollectionViewDataSource,
-    UICollectionViewDelegateFlowLayout {
+    UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
 
     @IBOutlet private weak var collectionView: UICollectionView?
     @IBOutlet private weak var coverView: UIView?
@@ -20,7 +20,8 @@ class ViewController: UIViewController, UICollectionViewDataSource,
         super.viewDidLoad()
     
         self.collectionView?.dataSource = self
-    
+        self.collectionView?.delegate = self
+        
         for i in 1 ... 8 {
             self.images.append(UIImage(named: "image_\(i)")!)
         }
@@ -28,31 +29,39 @@ class ViewController: UIViewController, UICollectionViewDataSource,
         self.selectedImageView?.isHidden = true
         let gesture = ForceTouchGestureRecognizer(target: self,
             action: #selector(imagePressed(sender:)))
+        
         self.view.addGestureRecognizer(gesture)
     }
     
     func imagePressed(sender: ForceTouchGestureRecognizer) {
         
         let location = sender.location(in: self.view)
-        print("imagePressed", location)
+        
         guard let indexPath = collectionView?.indexPathForItem(
             at: location) else { return }
 
        let image = self.images[indexPath.row]
         
         switch sender.state {
-        case .began:
+        case .changed:
+            if sender.isForceTouch {
                 self.coverView?.isHidden = false
                 self.selectedImageView?.isHidden = false
                 self.selectedImageView?.image = image
-            
-        case .changed:
-                self.selectedImageView?.image = image
+            }
             
         case .ended:
+            print("force: \(sender.forceValue)")
+            if sender.isForceTouch {
                 self.coverView?.isHidden = true
                 self.selectedImageView?.isHidden = true
                 self.selectedImageView?.image = nil
+            } else {
+                //TODO: handle selecting items of UICollectionView here,
+                //you can refer to this SO question for more info: https://stackoverflow.com/questions/42372609/collectionview-didnt-call-didselectitematindexpath-when-superview-has-gesture
+                print("Did select row at indexPath: \(indexPath)")
+                self.collectionView?.selectItem(at: indexPath, animated: true, scrollPosition: .centeredVertically)
+            }
             
         default: break
         }
@@ -82,8 +91,8 @@ class ViewController: UIViewController, UICollectionViewDataSource,
     func collectionView(_ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: UIScreen.main.bounds.width,
-                      height: UIScreen.main.bounds.width)
+        return CGSize(width: UIScreen.main.bounds.width / 2,
+                      height: UIScreen.main.bounds.width / 2)
     }
 }
 

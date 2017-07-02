@@ -11,17 +11,22 @@ import UIKit.UIGestureRecognizerSubclass
 class ForceTouchGestureRecognizer: UIGestureRecognizer {
     
     var forceValue: CGFloat = 0
+    var isForceTouch: Bool = false
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
-        state = .began
         handleForceWithTouches(touches: touches)
+        state = .began
+        self.isForceTouch = false
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesMoved(touches, with: event)
-        state = .changed
         handleForceWithTouches(touches: touches)
+        if self.forceValue > 6.0 {
+            state = .changed
+            self.isForceTouch = true
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -35,7 +40,7 @@ class ForceTouchGestureRecognizer: UIGestureRecognizer {
         state = .cancelled
         handleForceWithTouches(touches: touches)
     }
-    
+
     func handleForceWithTouches(touches: Set<UITouch>) {
         if touches.count != 1 {
             state = .failed
